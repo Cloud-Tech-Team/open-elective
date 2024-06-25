@@ -24,7 +24,6 @@ module.exports = {
         'crimson': "#DC143C",
         'dark-offset': "#0e0e0e",
         'dark-off': "#f7f7f7",
-
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
@@ -55,6 +54,9 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      transitionTimingFunction: {
+        'cubic': ' cubic-bezier(0.785, 0.135, 0.15, 0.86) ',
       },
       borderRadius: {
         lg: "var(--radius)",

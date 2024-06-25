@@ -1,6 +1,5 @@
 import React from 'react'
 import 'remixicon/fonts/remixicon.css'
-import Background from '../mini-components/bg-pic'
 import Instructions from './instructions'
 import Forms from './form'
 
