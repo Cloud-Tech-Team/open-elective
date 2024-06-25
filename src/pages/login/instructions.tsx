@@ -1,8 +1,6 @@
-import React from 'react'
-
 const Instructions = () => {
     return (
-        <div className='cstm-border md:w-[50%] w-[100%] h-[80vh] md:h-screen  bg-dark-offset/40  flex round flex-col justify-center items-center'>
+        <div className='md:w-[50%] w-[100%] h-[80vh] md:h-screen  bg-dark-offset/40  flex round flex-col justify-center items-center'>
             <h1 className='text-[4rem] font-medium'>Instructions</h1>
 
             <div className=' relative px-4 md:px-[1em] md:leading-loose'>
