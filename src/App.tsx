@@ -1,9 +1,9 @@
 import { ModeToggle } from "./components/ui/mode-toggle";
 import { ThemeProvider } from "./components/ui/theme-provider";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./components/login/login";
-import Home from "./components/Home/Home";
-import Thankyou from "./components/ThankYou/Thankyou";
+import Login from "./pages/login/login";
+import Home from "./pages/Home/Home";
+import Thankyou from "./pages/ThankYou/Thankyou";
 
 
 function App() {
