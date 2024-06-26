@@ -10,32 +10,39 @@ interface Course {
 
 const Home = () => {
   // const navigate = useNavigate();
-  const [courses, setCourses] = useState<Course[]>([{ courseId: "", courseName: "", seatsAvailable: 0 }]);
+  const [courses, setCourses] = useState<Course[]>([
+    { courseId: "", courseName: "", seatsAvailable: 0 },
+  ]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [seatsAvailable, setSeatsAvailable] = useState(0);
 
   // const department = localStorage.getItem("department");
   const department = "cs";
-  useEffect(() => {
-    fetch(`http://127.0.0.1:3000/courses/allcourses`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ department }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.length === 0) {
-          alert("No courses available for this department");
-        } else {
-          setCourses(data); // Directly set the courses with the fetched data
-          console.log(data);  
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching courses:", error);
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:3000/courses/allcourses`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ department }),
       });
+
+      const data = await response.json();
+
+      if (data.length === 0) {
+        alert("No courses available for this department");
+      } else {
+        setCourses(data); // Directly set the courses with the fetched data
+        console.log(data);
+      }
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
   }, []);
 
   // const Registered = () => {
@@ -48,14 +55,13 @@ const Home = () => {
   };
 
   const handleCourseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-
     const selectedCourse = courses.find(
-      (course) => course.courseId === event.target.value
+      (course) => course.courseName === event.target.value
     );
 
     if (selectedCourse) {
       setSelectedCourse(selectedCourse.courseName);
-      setSeatsAvailable(selectedCourse.seatsAvailable); 
+      setSeatsAvailable(selectedCourse.seatsAvailable);
     }
   };
 
@@ -82,11 +88,12 @@ const Home = () => {
           <option value="" disabled>
             Select a course
           </option>
-          {courses.map(course => (
+          {courses.map((course) => (
             <option
               key={course.courseId}
-              value={course.courseId}
-              className="bg-slate-900">
+              value={course.courseName}
+              className="bg-slate-900"
+            >
               {course.courseName}
             </option>
           ))}
