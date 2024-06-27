@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home/Home.tsx";
 import Thankyou from "./pages/ThankYou/Thankyou";
-import Login from "./pages/login/Login.tsx";
+import Login from "./pages/login/Login";
 
 function App() {
   return (
