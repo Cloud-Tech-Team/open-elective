@@ -1,6 +1,6 @@
 import "remixicon/fonts/remixicon.css";
-import Instructions from "./instructions";
-import Forms from "./form";
+import Instructions from "./Instructions";
+import Forms from "./Form";
 
 const Login = () => {
   return (

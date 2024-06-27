@@ -125,6 +125,11 @@ img {
   filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, .3));
 }
 
+select, option {
+  font: -moz-pull-down-menu;
+  font-family: inherit;
+}
+
 .important {
   font-weight: 700;
   color: rgba(255, 48, 48, 0.865);
