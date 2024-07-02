@@ -31,6 +31,9 @@ function Form() {
           return;
         }
         user.department = user.email?.slice(2, 4).toUpperCase() ?? "";
+        if (user.department === "CT"){
+          user.department = "AD"
+        }
         fetch(`${import.meta.env.VITE_URL}/register`, {
           method: "POST",
           headers: {

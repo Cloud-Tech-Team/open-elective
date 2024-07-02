@@ -11,9 +11,9 @@ const Home = () => {
   const coursemap = new Map([
     ["cs", "Computer Science"],
     ["me", "Mechanical"],
+    ["ce", "Civil"],
     ["ec", "Electronics Communication"],
     ["ee", "Electrical Electronics"],
-    ["ai", "Artificial Intelligence & Computer Science"],
     ["ad", "Artificial Intelligence & Data Science"],
   ]);
 
@@ -48,7 +48,9 @@ const Home = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ department }),
+            body: JSON.stringify({ 
+              department: department 
+            }),
           }
         );
 
