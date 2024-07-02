@@ -51,6 +51,10 @@ function Form() {
             alert("User already registered");
             return;
           }
+          if (response.status != 200 ){
+            alert("Server error, please try again later");
+            return;
+          }
           localStorage.setItem("userInfo", JSON.stringify(user));
           setUser({ name: "", email: "", registerId: "",department:"", optedCourses: null});
           navigate("/home");
