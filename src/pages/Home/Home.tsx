@@ -81,6 +81,13 @@ const Home = () => {
     }
   };
 
+  function toTitleCase(str: string) {
+    return str.replace(
+      /\w\S*/g,
+      text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+    );
+  }
+
   const toggleLoading = () => {
     if (selectedCourse === "") {
       alert("Please select a course");
@@ -140,17 +147,15 @@ const Home = () => {
               value={course.courseName}
               className="bg-slate-900"
             >
-              {course.courseName}
+              {toTitleCase(course.courseName)}
             </option>
           ))}
         </select>
 
-        <h4 className="font-medium py-3">Seats Available : {seatsAvailable}</h4>
-        <h4 className="font-medium py-3">Selected Course : {selectedCourse}</h4>
+        <h3 className="font-medium py-3">Seats Available: {seatsAvailable}</h3>
+        <h3 className="font-medium py-3">Selected Course: {toTitleCase(selectedCourse)}</h3>
         <p className="text-[1rem] leading-[1]">
-          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ut ipsum
-          blanditiis voluptatem natus id perferendis recusandae hic reiciendis
-          porro,{" "}
+        
         </p>
       </div>
 
