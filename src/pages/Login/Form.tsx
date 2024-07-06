@@ -65,7 +65,7 @@ function Form() {
         type="text"
         name="name" // Add name attribute
         required
-        placeholder="Student Name ( Advaith Narayanan )"
+        placeholder="Student Name ( Jhon Doe )"
         value={user.name}
         onChange={handleInputChange} // Bind onChange
         className="cubic-1 drop-shadow input p-2 bg-transparent border-b-2 border-white text-white hover:placeholder:text-dark-offset rounded placeholder:text-white/80"
@@ -74,7 +74,7 @@ function Form() {
         type="email"
         name="email" // Add name attribute
         required
-        placeholder="College Email ID ( 21CS051@mgits.ac.in )"
+        placeholder="College Email ID ( 20me007@mgits.ac.in )"
         value={user.email}
         onChange={handleInputChange} // Bind onChange
         className="cubic-1 drop-shadow input p-2 bg-transparent border-b-2 border-white text-white hover:placeholder:text-dark-offset rounded placeholder:text-white/80"
@@ -83,7 +83,7 @@ function Form() {
         type="text"
         name="registerId" // Add name attribute
         required
-        placeholder="Register No ( MUT21CS051 )"
+        placeholder="Register No ( MUT20ME420 )"
         value={user.registerId}
         onChange={handleInputChange} // Bind onChange
         className="cubic-1 drop-shadow input p-2 bg-transparent border-b-2 border-white text-white hover:placeholder:text-dark-offset rounded placeholder:text-white/80"
