@@ -1,3 +1,53 @@
+# Elective Selection System
+
+A web application designed to streamline the elective course selection process for final and pre-final year students at MITS college. The system ensures efficient registration and smooth slot allocation while handling high traffic effectively. 
+
+## Overview
+
+This application simplifies the elective selection process by enabling students to:
+- Register using their college email ID, username, and register number.
+- Browse and search for electives within their respective branches.
+- Book slots for desired courses, with each course having a maximum of 60 seats allocated on a first-come, first-serve basis.
+
+### Key Features
+
+- **Student Registration:** Students can register using their college-provided credentials.
+- **Branch & Course Selection:** Users can explore and select courses from their branch.
+- **Slot Allocation:** Each course has 60 slots available, allocated on a first-come, first-serve basis.
+- **Traffic Handling:** Optimized for smooth performance, reducing the likelihood of crashes during peak times.
+- **Cloud-Focused Architecture:** Designed for scalability and reliability using cloud-based services.
+
+## Technologies Used
+
+- **Frontend:** React with Vite
+- **TypeScript:** Ensures type safety and robust development practices
+
+### Prerequisites
+
+Ensure you have the following installed before setting up the project:
+
+- **Node.js**
+- **Vite**
+- **React**
+
+## Setup Instructions
+
+Follow these steps to get started:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Cloud-Tech-Team/open-elective.git
+   cd  open-elective
+2. Install dependencies:
+    ```bash
+   npm install
+3. Start the development server:
+    ```bash
+    npm run dev
+
+
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
