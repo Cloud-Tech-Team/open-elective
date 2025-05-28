@@ -22,8 +22,7 @@ const Home = () => {
   if (userinfo) {
     department = userinfo.department.toLowerCase();
     departmentName = coursemap.get(department) ?? "";
-  }
-  const [courses, setCourses] = useState<Course[]>([
+  }  const [courses, setCourses] = useState<Course[]>([
     { courseId: "", courseName: "", seatsAvailable: 0 },
   ]);
   const [courseId, setCourseId] = useState("");
@@ -31,7 +30,8 @@ const Home = () => {
   const [seatsAvailable, setSeatsAvailable] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(false);  useEffect(() => {
+  const [isConnected, setIsConnected] = useState(false);
+  const [isFormAllowed, setIsFormAllowed] = useState<boolean | null>(null);  useEffect(() => {
     if (!userinfo) {
       navigate("/");
       return;
@@ -69,6 +69,27 @@ const Home = () => {
 
     fetchData();
   }, [userinfo, navigate, department]);
+
+  // Check if form is allowed
+  useEffect(() => {
+    const checkFormAllowed = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_URL}/allowed`);
+        if (response.ok) {
+          const data = await response.json();
+          setIsFormAllowed(data.allowed); // Extract the 'allowed' property
+        } else {
+          console.error("Failed to check form status");
+          setIsFormAllowed(false);
+        }
+      } catch (error) {
+        console.error("Error checking form status:", error);
+        setIsFormAllowed(false);
+      }
+    };
+
+    checkFormAllowed();
+  }, []);
 
   // Handle socket connection status
   useEffect(() => {
@@ -180,8 +201,12 @@ const Home = () => {
       /\w\S*/g,
       (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
     );
-  }
-  const toggleLoading = async () => {
+  }  const toggleLoading = async () => {
+    if (!isFormAllowed) {
+      setError("Course selection is currently not allowed");
+      return;
+    }
+
     if (selectedCourse === "") {
       setError("Please select a course");
       return;
@@ -251,20 +276,33 @@ const Home = () => {
       </div>      <div className="w-[90%] h-max md:w-[48%] md:h-[90%] md:absolute right-5 bg-white/10 rounded-xl px-5 py-6 border-b-2 border-t-2 border-gray-500">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[2rem] font-bold">Select course:</h2>
-          <div className={`flex items-center gap-2 text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
-            {isConnected ? 'Live' : 'Offline'}
+          <div className="flex flex-col items-end gap-1">
+            <div className={`flex items-center gap-2 text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+              {isConnected ? 'Live' : 'Offline'}
+            </div>
+            <div className={`flex items-center gap-2 text-xs ${
+              isFormAllowed === null ? 'text-yellow-400' : 
+              isFormAllowed ? 'text-green-400' : 'text-red-400'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${
+                isFormAllowed === null ? 'bg-yellow-400' : 
+                isFormAllowed ? 'bg-green-400' : 'bg-red-400'
+              }`}></div>
+              {isFormAllowed === null ? 'Checking...' : 
+               isFormAllowed ? 'Open' : 'Closed'}
+            </div>
           </div>
         </div>
-        {error && <p className="text-red-500">{error}</p>}
-        <select
+        {error && <p className="text-red-500">{error}</p>}<select
           value={selectedCourse}
           onChange={handleCourseChange}
           className="course-selection-form w-[100%] bg-transparent border-2 border-white/50 py-3 px-6 rounded-full my-5"
           required
+          disabled={!isFormAllowed}
         >
           <option value="" disabled>
-            Select a course
+            {isFormAllowed === null ? "Loading..." : isFormAllowed ? "Select a course" : "Course selection is disabled"}
           </option>
           {courses.map((course) => (
             <option
@@ -281,14 +319,13 @@ const Home = () => {
           Selected Course: {toTitleCase(selectedCourse)}
         </h3>
       </div>
-      <div className="w-[90%] md:w-[49%] h-max md:h-[30%] flex justify-center items-center bg-white/10 rounded-[2rem] py-10 border-t-2 border-b-2 border-gray-500">
-        <button
+      <div className="w-[90%] md:w-[49%] h-max md:h-[30%] flex justify-center items-center bg-white/10 rounded-[2rem] py-10 border-t-2 border-b-2 border-gray-500">        <button
           className={`w-[80%] transition-all cubic duration-300 text-slate-900 bg-white hover:bg-slate-600 focus:text-white hover:text-white focus:bg-slate-600 font-medium rounded-full text-[1.5rem] px-5 py-2.5 text-center flex justify-center items-center ${
-            isLoading ? "opacity-50 cursor-not-allowed" : ""
+            isLoading || !isFormAllowed ? "opacity-50 cursor-not-allowed" : ""
           }`}
           type="button"
           onClick={toggleLoading}
-          disabled={isLoading}
+          disabled={isLoading || !isFormAllowed}
         >
           {isLoading ? (
             <>
@@ -314,6 +351,8 @@ const Home = () => {
               </svg>
               Loading...
             </>
+          ) : !isFormAllowed ? (
+            "Course Selection Disabled"
           ) : (
             "Submit"
           )}
