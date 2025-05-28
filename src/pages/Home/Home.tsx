@@ -23,7 +23,6 @@ const Home = () => {
     department = userinfo.department.toLowerCase();
     departmentName = coursemap.get(department) ?? "";
   }
-
   const [courses, setCourses] = useState<Course[]>([
     { courseId: "", courseName: "", seatsAvailable: 0 },
   ]);
@@ -32,8 +31,7 @@ const Home = () => {
   const [seatsAvailable, setSeatsAvailable] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
+  const [isConnected, setIsConnected] = useState(false);  useEffect(() => {
     if (!userinfo) {
       navigate("/");
       return;
@@ -62,10 +60,6 @@ const Home = () => {
           setError("No courses available for this department");
         } else {
           setCourses(data);
-          data.forEach((course: Course) => {
-            socket.emit("joinCourse", course.courseId);
-            console.log(`Joined room for course: ${course.courseId}`);
-          });
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -74,30 +68,99 @@ const Home = () => {
     };
 
     fetchData();
+  }, [userinfo, navigate, department]);
 
-    socket.on(
-      "courseUpdated",
-      ({ courseId: updatedCourseId, seatsAvailable }) => {
-        setCourses((prevCourses) =>
-          prevCourses.map((course) =>
-            course.courseId === updatedCourseId
-              ? { ...course, seatsAvailable }
-              : course
-          )
-        );
-        if (updatedCourseId === courseId) {
-          setSeatsAvailable(seatsAvailable);
-        }
-      }
-    );
+  // Handle socket connection status
+  useEffect(() => {
+    const handleConnect = () => {
+      setIsConnected(true);
+      console.log('Connected to server');
+    };
+
+    const handleDisconnect = () => {
+      setIsConnected(false);
+      console.log('Disconnected from server');
+    };
+
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+
+    // Set initial connection status
+    setIsConnected(socket.connected);
 
     return () => {
-      socket.off("courseUpdated");
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+    };
+  }, []);
+
+  // Separate useEffect for socket events to avoid dependency issues
+  useEffect(() => {
+    if (courses.length === 0 || courses[0].courseId === "") {
+      return;
+    }
+
+    // Join course rooms for real-time updates
+    courses.forEach((course: Course) => {
+      socket.emit("joinCourse", course.courseId);
+      // console.log(`Joined room for course: ${course.courseId}`);
+    });
+
+    // Set up real-time event listeners
+    const handleCourseUpdated = ({ courseId: updatedCourseId, seatsAvailable }: { courseId: string; seatsAvailable: number }) => {
+      // console.log(`Course updated: ${updatedCourseId}, seats: ${seatsAvailable}`);
+      setCourses((prevCourses) =>
+        prevCourses.map((course) =>
+          course.courseId === updatedCourseId
+            ? { ...course, seatsAvailable }
+            : course
+        )
+      );
+      // Update the selected course seats if it matches
+      if (updatedCourseId === courseId) {
+        setSeatsAvailable(seatsAvailable);
+      }
+    };
+
+    const handleCourseStatisticsUpdate = ({ courses: courseStats }: { courses: Array<{courseCode: string; seatsAvailable: number; enrolledCount: number; totalCapacity: number; enrollmentPercentage: string}> }) => {
+      // console.log('Course statistics updated:', courseStats);
+      // Update course data with the latest statistics
+      setCourses((prevCourses) =>
+        prevCourses.map((course) => {
+          const updatedCourse = courseStats.find(stat => stat.courseCode === course.courseId);
+          if (updatedCourse) {
+            return { ...course, seatsAvailable: updatedCourse.seatsAvailable };
+          }
+          return course;
+        })
+      );
+    };
+
+    const handleCourseCountUpdate = ({ totalCourses }: { totalCourses: number }) => {
+      console.log('Total courses updated:', totalCourses);
+      // You can use this for displaying total course count if needed
+    };
+
+    // Add event listeners
+    socket.on("courseUpdated", handleCourseUpdated);
+    socket.on("courseStatisticsUpdate", handleCourseStatisticsUpdate);
+    socket.on("courseCountUpdate", handleCourseCountUpdate);
+
+    // Request initial course statistics
+    socket.emit("requestCourseStatistics");
+
+    // Cleanup function
+    return () => {
+      socket.off("courseUpdated", handleCourseUpdated);
+      socket.off("courseStatisticsUpdate", handleCourseStatisticsUpdate);
+      socket.off("courseCountUpdate", handleCourseCountUpdate);
+      
+      // Leave course rooms
       courses.forEach((course) => {
         socket.emit("leaveCourse", course.courseId);
       });
     };
-  }, [userinfo, navigate, department, courseId]);
+  }, [courses, courseId]);
 
   const handleCourseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = courses.find(
@@ -118,7 +181,6 @@ const Home = () => {
       (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
     );
   }
-
   const toggleLoading = async () => {
     if (selectedCourse === "") {
       setError("Please select a course");
@@ -158,6 +220,14 @@ const Home = () => {
               : course
           )
         );
+        
+        // Emit course update for real-time sync (if the server supports it)
+        socket.emit("courseSelected", {
+          courseId: courseId,
+          seatsAvailable: data.seatsAvailable,
+          userEmail: userinfo?.email
+        });
+        
         localStorage.removeItem("userInfo");
         navigate("/registered");
       }
@@ -178,9 +248,14 @@ const Home = () => {
         <div className="border-2 border-white/50 my-4 rounded-full py-2 flex items-center justify-center">
           <h3 className="text-[1.2rem]">{departmentName}</h3>
         </div>
-      </div>
-      <div className="w-[90%] h-max md:w-[48%] md:h-[90%] md:absolute right-5 bg-white/10 rounded-xl px-5 py-6 border-b-2 border-t-2 border-gray-500">
-        <h2 className="text-[2rem] font-bold">Select course:</h2>
+      </div>      <div className="w-[90%] h-max md:w-[48%] md:h-[90%] md:absolute right-5 bg-white/10 rounded-xl px-5 py-6 border-b-2 border-t-2 border-gray-500">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[2rem] font-bold">Select course:</h2>
+          <div className={`flex items-center gap-2 text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+            {isConnected ? 'Live' : 'Offline'}
+          </div>
+        </div>
         {error && <p className="text-red-500">{error}</p>}
         <select
           value={selectedCourse}

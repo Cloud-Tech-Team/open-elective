@@ -5,3 +5,11 @@ export interface Course {
   description?: string;
   enrolledStudents?: string;
 }
+
+export interface CourseStatistics {
+  courseCode: string;
+  seatsAvailable: number;
+  enrolledCount: number;
+  totalCapacity: number;
+  enrollmentPercentage: string;
+}
