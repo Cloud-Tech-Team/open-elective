@@ -1,6 +1,7 @@
 export interface Course {
-    courseId: string;
-    courseName: string;
-    seatsAvailable: number;
-    description?: string;
-  }
+  courseId: string;
+  courseName: string;
+  seatsAvailable: number;
+  description?: string;
+  enrolledStudents?: string;
+}
