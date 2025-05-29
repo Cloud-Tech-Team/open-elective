@@ -14,11 +14,12 @@ const Home = () => {
     ["ce", "Civil"],
     ["ec", "Electronics Communication"],
     ["ee", "Electrical Electronics"],
+    ["ai", "Computer Science & Artificial Intelligence"],
     ["ad", "Artificial Intelligence & Data Science"],
+    ["cy", "Cyber Security"],
   ]);
 
   const userinfo: User | null = JSON.parse(localStorage.getItem("userInfo")!);
-  console.log(userinfo);
   if (userinfo) {
     department = userinfo.department.toLowerCase();
     departmentName = coursemap.get(department) ?? "";
