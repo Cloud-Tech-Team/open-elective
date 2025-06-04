@@ -4,6 +4,7 @@ import { User } from "@/types/User";
 
 function Form() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState<User>({
     name: "",
     email: "",
@@ -11,7 +12,9 @@ function Form() {
     department: "",
     optedCourses: null,
   });
-  const [isRegistrationAllowed, setIsRegistrationAllowed] = useState<boolean | null>(null);
+  const [isRegistrationAllowed, setIsRegistrationAllowed] = useState<
+    boolean | null
+  >(null);
   const [isCheckingAllowed, setIsCheckingAllowed] = useState<boolean>(true);
 
   // Check if registration is allowed
@@ -24,11 +27,11 @@ function Form() {
           const data = await response.json();
           setIsRegistrationAllowed(data.allowed);
         } else {
-          console.error('Failed to check registration status');
+          console.error("Failed to check registration status");
           setIsRegistrationAllowed(false);
         }
       } catch (error) {
-        console.error('Error checking registration status:', error);
+        console.error("Error checking registration status:", error);
         setIsRegistrationAllowed(false);
       } finally {
         setIsCheckingAllowed(false);
@@ -40,7 +43,7 @@ function Form() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setUser((prevUser) => ({  
+    setUser((prevUser) => ({
       ...prevUser,
       [name]: value,
     }));
@@ -52,7 +55,9 @@ function Form() {
         {isCheckingAllowed ? (
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-            <span className="text-yellow-400 text-sm">Checking registration status...</span>
+            <span className="text-yellow-400 text-sm">
+              Checking registration status...
+            </span>
           </div>
         ) : isRegistrationAllowed ? (
           <div className="flex items-center gap-2">
@@ -78,12 +83,14 @@ function Form() {
 
       <form
         className="flex flex-col gap-2"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
 
           // Prevent submission if registration is not allowed
           if (!isRegistrationAllowed) {
-            alert("Registration is currently disabled. Please try again later.");
+            alert(
+              "Registration is currently disabled. Please try again later."
+            );
             return;
           }
 
@@ -92,37 +99,55 @@ function Form() {
             alert("Please enter a valid college email id");
             return;
           }
-          user.department = user.email?.slice(2, 4).toUpperCase() ?? "";
-          if (user.department === "CT"){
-            user.department = "AD"
-          }
-          fetch(`${import.meta.env.VITE_URL}/register`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: user.name,
-              email: user.email,
-              registerId: user.registerId,
-              department: user.department,
-              optedCourses: null,
-            }),
-          }).then((response) => {
-            if (response.status === 412){
+
+          setIsSubmitting(true);
+          try {
+            user.department = user.email?.slice(2, 4).toUpperCase() ?? "";
+            if (user.department === "CT") {
+              user.department = "AD";
+            }
+            const response = await fetch(`${import.meta.env.VITE_URL}/register`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: user.name,
+                email: user.email,
+                registerId: user.registerId,
+                department: user.department,
+                optedCourses: null,
+              }),
+            });
+
+            if (response.status === 412) {
               alert("User already registered");
               return;
             }
-            if (response.status != 200 ){
+            if (response.status !== 200) {
               alert("Server error, please try again later");
               return;
             }
+
             localStorage.setItem("userInfo", JSON.stringify(user));
-            setUser({ name: "", email: "", registerId: "",department:"", optedCourses: null});
+            setUser({
+              name: "",
+              email: "",
+              registerId: "",
+              department: "",
+              optedCourses: null,
+            });
             navigate("/home");
-          })
+          } catch (error) {
+            console.error("Error during registration:", error);
+            alert("An error occurred during registration. Please try again.");
+          } finally {
+            setIsSubmitting(false);
+          }
         }}
-      >        <input
+      >
+        {" "}
+        <input
           type="text"
           name="name"
           required
@@ -131,9 +156,9 @@ function Form() {
           onChange={handleInputChange}
           disabled={!isRegistrationAllowed || isCheckingAllowed}
           className={`cubic-1 drop-shadow input p-2 bg-transparent border-b-2 text-white hover:placeholder:text-dark-offset rounded placeholder:text-white/80 ${
-            !isRegistrationAllowed || isCheckingAllowed 
-              ? 'border-gray-500 text-gray-400 cursor-not-allowed' 
-              : 'border-white'
+            !isRegistrationAllowed || isCheckingAllowed
+              ? "border-gray-500 text-gray-400 cursor-not-allowed"
+              : "border-white"
           }`}
         />
         <input
@@ -145,9 +170,9 @@ function Form() {
           onChange={handleInputChange}
           disabled={!isRegistrationAllowed || isCheckingAllowed}
           className={`cubic-1 drop-shadow input p-2 bg-transparent border-b-2 text-white hover:placeholder:text-dark-offset rounded placeholder:text-white/80 ${
-            !isRegistrationAllowed || isCheckingAllowed 
-              ? 'border-gray-500 text-gray-400 cursor-not-allowed' 
-              : 'border-white'
+            !isRegistrationAllowed || isCheckingAllowed
+              ? "border-gray-500 text-gray-400 cursor-not-allowed"
+              : "border-white"
           }`}
         />
         <input
@@ -159,24 +184,31 @@ function Form() {
           onChange={handleInputChange}
           disabled={!isRegistrationAllowed || isCheckingAllowed}
           className={`cubic-1 drop-shadow input p-2 bg-transparent border-b-2 text-white hover:placeholder:text-dark-offset rounded placeholder:text-white/80 ${
-            !isRegistrationAllowed || isCheckingAllowed 
-              ? 'border-gray-500 text-gray-400 cursor-not-allowed' 
-              : 'border-white'
+            !isRegistrationAllowed || isCheckingAllowed
+              ? "border-gray-500 text-gray-400 cursor-not-allowed"
+              : "border-white"
           }`}
         />
-        <button 
+        <button
           type="submit"
-          disabled={!isRegistrationAllowed || isCheckingAllowed}
+          disabled={!isRegistrationAllowed || isCheckingAllowed || isSubmitting}
           className={`p-2 font-bold text-[1.4rem] rounded mt-[2em] transition-all duration-200 ${
-            !isRegistrationAllowed || isCheckingAllowed 
-              ? 'bg-gray-500 text-gray-300 cursor-not-allowed' 
-              : 'bg-white text-dark-offset hover:bg-gray-100'
+            !isRegistrationAllowed || isCheckingAllowed || isSubmitting
+              ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+              : "bg-white text-dark-offset hover:bg-gray-100"
           }`}
         >
-          {isCheckingAllowed ? 'Checking...' : isRegistrationAllowed ? 'Next' : 'Registration Closed'}
+          {isSubmitting
+            ? "Submitting..."
+            : isCheckingAllowed
+            ? "Checking..."
+            : isRegistrationAllowed
+            ? "Next"
+            : "Registration Closed"}
         </button>
       </form>
-    </div>  );
+    </div>
+  );
 }
 
 export default Form;
